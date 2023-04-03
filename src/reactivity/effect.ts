@@ -2,14 +2,14 @@
  * @Author: XiaoJun
  * @Date: 2023-03-29 21:01:41
  * @LastEditors: XiaoJun
- * @LastEditTime: 2023-03-29 22:58:51
+ * @LastEditTime: 2023-04-03 13:31:37
  * @Description: effect
  * @FilePath: /xj-mini-vue/src/reactivity/effect.ts
  */
 
 class ReactiveEffect {
   private fn;
-  constructor(fn) {
+  constructor(fn, public scheduler) {
     this.fn = fn;
   }
   run() {
@@ -19,8 +19,9 @@ class ReactiveEffect {
     return res;
   }
 }
-export function effect(fn) {
-  const _effect = new ReactiveEffect(fn);
+export function effect(fn, options?) {
+  const scheduler = options?.scheduler;
+  const _effect = new ReactiveEffect(fn, scheduler);
   _effect.run();
   return _effect.run.bind(_effect);
 }
@@ -50,6 +51,12 @@ export function trigger(target, key) {
   let depsMap = targetMap.get(target);
   let dep = depsMap.get(key);
   for (const effect of dep) {
-    effect.run();
+    if (effect.scheduler) {
+      effect.scheduler();
+    } else {
+      effect.run();
+    }
   }
 }
+/** 触发停止 */
+export function stop(runner) {}

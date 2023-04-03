@@ -2,13 +2,15 @@
  * @Author: XiaoJun
  * @Date: 2023-03-29 21:01:41
  * @LastEditors: XiaoJun
- * @LastEditTime: 2023-04-03 13:31:37
+ * @LastEditTime: 2023-04-04 00:28:57
  * @Description: effect
  * @FilePath: /xj-mini-vue/src/reactivity/effect.ts
  */
 
 class ReactiveEffect {
   private fn;
+  deps = [];
+  active = true;
   constructor(fn, public scheduler) {
     this.fn = fn;
   }
@@ -18,12 +20,22 @@ class ReactiveEffect {
     activeEffect = null; // xj擅自添加的,处理effect即便传空对象，也能被连带触发相应问题
     return res;
   }
+  stop() {
+    if (this.active) {
+      this.active = false;
+      this.deps.forEach((dep: any) => {
+        dep.delete(this);
+      });
+    }
+  }
 }
 export function effect(fn, options?) {
   const scheduler = options?.scheduler;
   const _effect = new ReactiveEffect(fn, scheduler);
   _effect.run();
-  return _effect.run.bind(_effect);
+  const runner: any = _effect.run.bind(_effect);
+  runner.effect = _effect;
+  return runner;
 }
 
 const targetMap = new Map();
@@ -44,6 +56,7 @@ export function track(target, key) {
   }
   if (activeEffect) {
     dep.add(activeEffect);
+    activeEffect.deps.push(dep);
   }
 }
 /** 触发依赖 */
@@ -59,4 +72,6 @@ export function trigger(target, key) {
   }
 }
 /** 触发停止 */
-export function stop(runner) {}
+export function stop(runner) {
+  runner.effect.stop();
+}

@@ -2,7 +2,7 @@
  * @Author: XiaoJun
  * @Date: 2023-04-03 12:41:09
  * @LastEditors: XiaoJun
- * @LastEditTime: 2023-04-03 13:33:15
+ * @LastEditTime: 2023-04-04 00:12:54
  * @Description: 组件功能
  * @FilePath: /xj-mini-vue/src/reactivity/tests/effect.spec.ts
  */
@@ -87,8 +87,10 @@ describe('effect', () => {
     stop(runner);
     obj.prop = 3;
     expect(dummy).toBe(2);
-
     runner();
+    expect(dummy).toBe(3);
+    stop(runner);
+    obj.prop = 4;
     expect(dummy).toBe(3);
   });
   it('onStop', () => {

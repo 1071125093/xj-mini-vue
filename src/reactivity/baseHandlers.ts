@@ -2,7 +2,7 @@
  * @Author: XiaoJun
  * @Date: 2023-04-05 14:58:17
  * @LastEditors: XiaoJun
- * @LastEditTime: 2023-04-11 15:16:37
+ * @LastEditTime: 2023-04-11 16:54:59
  * @Description: 组件功能
  * @FilePath: /xj-mini-vue/src/reactivity/baseHandlers.ts
  */
@@ -40,11 +40,12 @@ const wannaGetter = (isReadonly = false, shallow = false) => {
 const wannaSetter = (isReadonly = false) => {
   return (target, key, value) => {
     if (!isReadonly) {
+      // 如果属性设置成功,则返回true。否则,它将返回false。
       const res = Reflect.set(target, key, value);
       // #tips 非只读-触发依赖
       trigger(target, key);
-      // return res;
-      return true
+      return res;
+      // return true
     } else {
       console.warn(`只读对象${target}不可修改`);
       return true;

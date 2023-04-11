@@ -2,7 +2,7 @@
  * @Author: XiaoJun
  * @Date: 2023-03-29 21:01:41
  * @LastEditors: XiaoJun
- * @LastEditTime: 2023-04-04 00:28:57
+ * @LastEditTime: 2023-04-11 12:55:29
  * @Description: effect
  * @FilePath: /xj-mini-vue/src/reactivity/effect.ts
  */
@@ -16,6 +16,7 @@ class ReactiveEffect {
   }
   run() {
     activeEffect = this;
+    this.active = true;
     const res = this.fn();
     activeEffect = null; // xj擅自添加的,处理effect即便传空对象，也能被连带触发相应问题
     return res;

@@ -2,7 +2,7 @@
  * @Author: XiaoJun
  * @Date: 2023-04-03 12:41:09
  * @LastEditors: XiaoJun
- * @LastEditTime: 2023-04-04 00:12:54
+ * @LastEditTime: 2023-04-11 12:51:52
  * @Description: 组件功能
  * @FilePath: /xj-mini-vue/src/reactivity/tests/effect.spec.ts
  */
@@ -17,10 +17,10 @@ describe('effect', () => {
     let nextAge;
     effect(() => {
       nextAge = user.age + 1;
-      console.log('页面A刷新');
+      // console.log('页面A刷新');
     });
     effect(() => {
-      console.log('页面B刷新');
+      // console.log('页面B刷新');
     });
 
     expect(nextAge).toBe(11);

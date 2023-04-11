@@ -2,19 +2,21 @@
  * @Author: XiaoJun
  * @Date: 2023-03-29 21:01:41
  * @LastEditors: XiaoJun
- * @LastEditTime: 2023-04-11 15:55:40
+ * @LastEditTime: 2023-04-11 18:07:21
  * @Description: effect
  * @FilePath: /xj-mini-vue/src/reactivity/effect.ts
  */
 let activeEffect;
 let showTrack; // 第12节课，但是与activeEffect高度重叠
 
-class ReactiveEffect {
+export class ReactiveEffect {
   private fn;
+  public scheduler;
   dep = [];
   active = true;
-  constructor(fn, public scheduler) {
+  constructor(fn, scheduler?) {
     this.fn = fn;
+    this.scheduler = scheduler;
   }
   run() {
     activeEffect = this;
@@ -31,7 +33,7 @@ class ReactiveEffect {
   }
 }
 
-const cleanupEffect = (effect) => {
+export const cleanupEffect = (effect) => {
   effect.dep.forEach((dep: any) => {
     dep.delete(effect);
   });

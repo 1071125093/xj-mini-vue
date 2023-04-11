@@ -2,10 +2,12 @@
  * @Author: XiaoJun
  * @Date: 2023-03-29 21:01:41
  * @LastEditors: XiaoJun
- * @LastEditTime: 2023-04-11 12:55:29
+ * @LastEditTime: 2023-04-11 14:35:48
  * @Description: effect
  * @FilePath: /xj-mini-vue/src/reactivity/effect.ts
  */
+let activeEffect;
+let showTrack; // 第12节课，但是与activeEffect高度重叠
 
 class ReactiveEffect {
   private fn;
@@ -24,12 +26,20 @@ class ReactiveEffect {
   stop() {
     if (this.active) {
       this.active = false;
-      this.deps.forEach((dep: any) => {
-        dep.delete(this);
-      });
+      cleanupEffect(this);
+      // this.deps.forEach((deps: any) => {
+      //   deps.delete(this);
+      // });
     }
   }
 }
+
+const cleanupEffect = (effect) => {
+  effect.deps.forEach((deps: any) => {
+    deps.delete(effect);
+  });
+};
+
 export function effect(fn, options?) {
   const scheduler = options?.scheduler;
   const _effect = new ReactiveEffect(fn, scheduler);
@@ -41,30 +51,37 @@ export function effect(fn, options?) {
 
 const targetMap = new Map();
 
-let activeEffect;
 /** 触发收集 */
 export function track(target, key) {
-  // target -> key -> dep
+  // target -> key -> deps
+  if (!needTrack()) return;
+
   let depsMap = targetMap.get(target);
   if (!depsMap) {
     depsMap = new Map();
     targetMap.set(target, depsMap);
   }
-  let dep = depsMap.get(key);
-  if (!dep) {
-    dep = new Set();
-    depsMap.set(key, dep);
+  let deps = depsMap.get(key);
+  if (!deps) {
+    deps = new Set();
+    depsMap.set(key, deps);
   }
-  if (activeEffect) {
-    dep.add(activeEffect);
-    activeEffect.deps.push(dep);
-  }
+  deps.add(activeEffect);
+  activeEffect.deps.push(deps);
 }
+
+/** 是否需要收集
+ * 当effect run起来的时候 就需要追踪
+ */
+const needTrack = () => {
+  return Boolean(activeEffect);
+};
+
 /** 触发依赖 */
 export function trigger(target, key) {
   let depsMap = targetMap.get(target);
-  let dep = depsMap.get(key);
-  for (const effect of dep) {
+  let deps = depsMap.get(key);
+  for (const effect of deps) {
     if (effect.scheduler) {
       effect.scheduler();
     } else {

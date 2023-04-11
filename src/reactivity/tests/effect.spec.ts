@@ -2,7 +2,7 @@
  * @Author: XiaoJun
  * @Date: 2023-04-03 12:41:09
  * @LastEditors: XiaoJun
- * @LastEditTime: 2023-04-11 12:51:52
+ * @LastEditTime: 2023-04-11 13:44:31
  * @Description: 组件功能
  * @FilePath: /xj-mini-vue/src/reactivity/tests/effect.spec.ts
  */
@@ -85,7 +85,8 @@ describe('effect', () => {
     obj.prop = 2;
     expect(dummy).toBe(2);
     stop(runner);
-    obj.prop = 3;
+    // obj.prop = 3;
+    obj.prop++
     expect(dummy).toBe(2);
     runner();
     expect(dummy).toBe(3);

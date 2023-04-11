@@ -6,7 +6,7 @@
  * @Description: 组件功能
  * @FilePath: /xj-mini-vue/src/reactivity/tests/readonly.test.ts
  */
-import { isReactive, isReadonly, readonly } from '../reactive';
+import { isProxy, isReactive, isReadonly, readonly } from '../reactive';
 
 describe('readonly测试开始', () => {
   it('happy path', () => {
@@ -24,6 +24,9 @@ describe('readonly测试开始', () => {
     expect(isReadonly(wrapped.bar)).toBe(true);
     // 没想到啊，你这个浓眉大眼的也被背叛了
     expect(isReactive(wrapped.bar)).toBe(false);
+    
+    expect(isProxy(wrapped)).toBe(true);
+    expect(isProxy(original)).toBe(false);
   });
   //
   it('warn then call set', () => {

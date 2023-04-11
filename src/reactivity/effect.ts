@@ -2,7 +2,7 @@
  * @Author: XiaoJun
  * @Date: 2023-03-29 21:01:41
  * @LastEditors: XiaoJun
- * @LastEditTime: 2023-04-11 14:35:48
+ * @LastEditTime: 2023-04-11 15:55:40
  * @Description: effect
  * @FilePath: /xj-mini-vue/src/reactivity/effect.ts
  */
@@ -11,7 +11,7 @@ let showTrack; // 第12节课，但是与activeEffect高度重叠
 
 class ReactiveEffect {
   private fn;
-  deps = [];
+  dep = [];
   active = true;
   constructor(fn, public scheduler) {
     this.fn = fn;
@@ -27,16 +27,13 @@ class ReactiveEffect {
     if (this.active) {
       this.active = false;
       cleanupEffect(this);
-      // this.deps.forEach((deps: any) => {
-      //   deps.delete(this);
-      // });
     }
   }
 }
 
 const cleanupEffect = (effect) => {
-  effect.deps.forEach((deps: any) => {
-    deps.delete(effect);
+  effect.dep.forEach((dep: any) => {
+    dep.delete(effect);
   });
 };
 
@@ -53,7 +50,7 @@ const targetMap = new Map();
 
 /** 触发收集 */
 export function track(target, key) {
-  // target -> key -> deps
+  // target -> key -> dep
   if (!needTrack()) return;
 
   let depsMap = targetMap.get(target);
@@ -61,13 +58,18 @@ export function track(target, key) {
     depsMap = new Map();
     targetMap.set(target, depsMap);
   }
-  let deps = depsMap.get(key);
-  if (!deps) {
-    deps = new Set();
-    depsMap.set(key, deps);
+  let dep = depsMap.get(key);
+  if (!dep) {
+    dep = new Set();
+    depsMap.set(key, dep);
   }
-  deps.add(activeEffect);
-  activeEffect.deps.push(deps);
+  trackEffects(dep);
+}
+/** 触发收集-提取Effects部分 */
+export function trackEffects(dep) {
+  if (!needTrack()) return;
+  dep.add(activeEffect);
+  activeEffect.dep.push(dep);
 }
 
 /** 是否需要收集
@@ -80,8 +82,11 @@ const needTrack = () => {
 /** 触发依赖 */
 export function trigger(target, key) {
   let depsMap = targetMap.get(target);
-  let deps = depsMap.get(key);
-  for (const effect of deps) {
+  let dep = depsMap.get(key);
+  triggerEffects(dep);
+}
+export function triggerEffects(dep) {
+  for (const effect of dep) {
     if (effect.scheduler) {
       effect.scheduler();
     } else {
@@ -89,6 +94,7 @@ export function trigger(target, key) {
     }
   }
 }
+
 /** 触发停止 */
 export function stop(runner) {
   runner.effect.stop();

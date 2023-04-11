@@ -2,7 +2,7 @@
  * @Author: XiaoJun
  * @Date: 2023-04-05 14:58:17
  * @LastEditors: XiaoJun
- * @LastEditTime: 2023-04-11 13:26:54
+ * @LastEditTime: 2023-04-11 15:16:37
  * @Description: 组件功能
  * @FilePath: /xj-mini-vue/src/reactivity/baseHandlers.ts
  */
@@ -11,7 +11,7 @@ import { track, trigger } from './effect';
 import { EnumReactiveFlag, reactive, readonly } from './reactive';
 
 /** 想要-getter */
-const wannaGetter = (isReadonly = false) => {
+const wannaGetter = (isReadonly = false, shallow = false) => {
   return (target, key) => {
     if (key === EnumReactiveFlag.IS_REACTIVE) {
       return !isReadonly;
@@ -21,7 +21,9 @@ const wannaGetter = (isReadonly = false) => {
     }
     const res = Reflect.get(target, key);
     // res如果是obj--> 对内部对象进行嵌套reactive处理
-    if (isObject(res)) {
+    if (shallow) {
+      // 无事发生
+    } else if (isObject(res)) {
       return isReadonly ? readonly(res) : reactive(res);
     }
     if (!isReadonly) {
@@ -41,10 +43,12 @@ const wannaSetter = (isReadonly = false) => {
       const res = Reflect.set(target, key, value);
       // #tips 非只读-触发依赖
       trigger(target, key);
-      return res;
+      // return res;
+      return true
     } else {
       console.warn(`只读对象${target}不可修改`);
       return true;
+      // return false; false直接终端程序了
     }
   };
 };
@@ -61,5 +65,13 @@ export const mutableHandlers = {
  */
 export const readonlyHandlers = {
   get: wannaGetter(true),
+  set: wannaSetter(true)
+};
+
+/** 表层四班的readonly的handlers
+ * 目前用于readonly
+ */
+export const shallowReadonlyHandlers = {
+  get: wannaGetter(true, true),
   set: wannaSetter(true)
 };

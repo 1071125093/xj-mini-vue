@@ -2,11 +2,11 @@
  * @Author: XiaoJun
  * @Date: 2023-04-03 12:41:09
  * @LastEditors: XiaoJun
- * @LastEditTime: 2023-04-11 13:26:11
+ * @LastEditTime: 2023-04-11 15:19:37
  * @Description: 组件功能
  * @FilePath: /xj-mini-vue/src/reactivity/tests/reactive.spec.ts
  */
-import { isReactive, isReadonly, reactive } from '../reactive';
+import { isReactive, isReadonly, reactive, isProxy } from '../reactive';
 describe('reactive', () => {
   it('happy path', () => {
     const original = {
@@ -19,6 +19,8 @@ describe('reactive', () => {
     // 测试isReactive
     expect(isReactive(observed)).toBe(true);
     expect(isReactive(original)).toBe(false);
+    expect(isProxy(observed)).toBe(true);
+    expect(isProxy(original)).toBe(false);
   });
   it('nested reactive', () => {
     const original = {
